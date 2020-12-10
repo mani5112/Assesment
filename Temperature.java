@@ -27,9 +27,6 @@ public class Temperature {
 		String API_KEY="b6907d289e10d714a6e88b30761fae22";
 		String Location="London,us";
 		String urlString="https://samples.openweathermap.org/data/2.5/forecast/hourly?q="+Location+"&appid="+API_KEY+"&units=imperial";
-		/*String API_KEY="1e190cd39a31f8c34bdf8fbcd508ba14";
-		String Location="Raleigh,NC";
-		String urlString="http://api.openweathermap.org/data/2.5/weather?q"+Location+"&appid="+API_KEY+"&units=imperial";*/
 		try {
 			StringBuilder result=new StringBuilder();
 			URL url=new URL(urlString);
