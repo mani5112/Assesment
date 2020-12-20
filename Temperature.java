@@ -1,59 +1,88 @@
-import java.util.*;
-import java.io.*;
-import java.io.BufferedReader;
+package jsonfiles;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Map;
-import com.google.gson.*;
-import com.google.gson.reflect.*;
-import java.util.ArrayList;
+import java.util.*;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Temperature {
 	
-	public static Map<String, Object> jsonToMap(String str){
-		Map<String,Object> map=new Gson().fromJson(
-				str,new TypeToken<HashMap<String,Object>>(){}.getType()
-				);
-		return map;
+	public static void max_Temp(JSONArray arr) {
+		double max=0;
+		String s="";
+		for(Object obj:arr) {
+			if(obj instanceof JSONObject) {
+				JSONObject jobj=(JSONObject)obj;
+				JSONObject job=(JSONObject)jobj.get("main");
+				JSONArray jarray=(JSONArray)jobj.get("weather");
+				JSONObject jarrayobj=(JSONObject)jarray.get(0);
+				//System.out.println(jarrayobj.get("main"));
+				if(jarrayobj.get("main").toString().contains("Rain")) {
+					System.out.println(jobj.get("dt_txt"));
+				}
+				//System.out.println(job.get("temp_max").getClass().getName());
+				if(job.get("temp_max").getClass().getName().equals("java.lang.Long")) {
+					continue;
+				}
+				//  System.out.println((Double)job.get("temp_max"));
+				double val=(Double)job.get("temp_max");
+				if(val>max) {
+					max=val;
+					s=jobj.get("dt_txt").toString();
+				}
+			}
+		}
+		System.out.println("S---->"+s);
+		System.out.println("Max: "+max);
 	}
-	public static void MaxI(ArrayList l,ArrayList l2) {
-		System.out.println(Collections.max(l));
-		System.out.println(Collections.min(l2));
+	public static void giveDate(JSONObject obj,String s) {
+		String str=obj.get("dt_txt").toString();
+		if(str.equals(s)) {
+			JSONObject jmain=(JSONObject)obj.get("main");
+			System.out.println("temp_min: "+jmain.get("temp_min"));
+			System.out.println("temp_max: "+jmain.get("temp_max"));
+			System.out.println("humidity: "+jmain.get("humidity"));
+			JSONArray jarr=(JSONArray)obj.get("weather");
+			JSONObject wea=(JSONObject)jarr.get(0);
+			System.out.println("Weather_Main: "+wea.get("main"));
+		}
 	}
+	
+	
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		String API_KEY="b6907d289e10d714a6e88b30761fae22";
-		String Location="London,us";
-		String urlString="https://samples.openweathermap.org/data/2.5/forecast/hourly?q="+Location+"&appid="+API_KEY+"&units=imperial";
-		try {
-			StringBuilder result=new StringBuilder();
-			URL url=new URL(urlString);
-			URLConnection conn=url.openConnection();
-			BufferedReader rd=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line;
-			while((line=rd.readLine())!=null) {
-				result.append(line);
+		Scanner sc=new Scanner(System.in);
+		String input=sc.nextLine();
+		JSONParser parser=new JSONParser();
+		try(FileReader fr=new FileReader("I:\\Work\\TrainingPlan\\src\\jsonfiles\\data.json")){
+			JSONArray jarr=(JSONArray)parser.parse(fr);
+			System.out.println(jarr.size());
+			//System.out.println(jarr);
+			for(Object obj:jarr) {
+				if(obj instanceof JSONObject) {
+					JSONObject jobj=(JSONObject)obj;
+					giveDate(jobj,input);
+					//if(jobj.get("dt_txt"))
+					//System.out.println(jobj);
+				}
 			}
-			rd.close();
-			System.out.println(result);
-			Map<String,Object> respMap=jsonToMap(result.toString());
-			Map<String,Object> mainMap=jsonToMap(respMap.get("main").toString());
-			Map<String,Object> windMap=jsonToMap(respMap.get("wind").toString());
-			ArrayList<Double> tem_max=new ArrayList<>();
-			ArrayList<Double> tem_min=new ArrayList<>();
-			System.out.println("curr temp: "+mainMap.get("temp"));
-			tem_max.add(mainMap.get("temp").get("temp_max"));
-			tem_min.add(mainMap.get("temp").get("temp_min"));
-			System.out.println("current humidity: "+mainMap.get("humidity"));
-			System.out.println("Wind Speeds: "+windMap.get("speed"));
-			System.out.println("Wind Angle: "+windMap.get("deg"));
-		}catch(IOException e) {
-			System.out.println(e.getMessage());
+			max_Temp(jarr);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		
 
 	}
 
